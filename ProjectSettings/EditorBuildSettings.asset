@@ -9,11 +9,17 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: b98c6c88eb7218c4ba5ae66348f11e93
   - enabled: 1
+    path: Assets/Scenes/Stage1_Level1.unity
+    guid: b5fd9dfe8542d4666a972ec554453586
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
     path: Assets/Scenes/Drawing Level.unity
     guid: 4e104783071941d4c934d7646f9632f0
+  - enabled: 1
+    path: Assets/Scenes/rockpapaerscissors.unity
+    guid: c6f5652618903ab4fb97cb493942bbca
   - enabled: 1
     path: Assets/Scenes/Credits.unity
     guid: c4bdeab33cea2ad408472f8f8c44d45c

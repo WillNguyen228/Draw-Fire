@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class boss : MonoBehaviour
 {
-    public enum LineType { Horizontal, Vertical, VShape, CaretShape }
+    public enum LineType { Horizontal, Vertical, VShape, CaretShape, HeartShape }
     public GameObject completeDrawingLevelUI; // Reference to your UI that will show the "Level Complete" message
     public float delayBeforeUI = 2f;   // Delay in seconds before showing the "Level Complete" UI
     public LineType[] enemyLineTypes;  // The line type associated with the enemy
@@ -19,10 +19,13 @@ public class boss : MonoBehaviour
         enemyLineTypes = new LineType[15];  // Random length between 1 and 3 for the example
 
         // Populate the enemyLineTypes array with random values
-        for (int i = 0; i < enemyLineTypes.Length; i++)
+        for (int i = 0; i < enemyLineTypes.Length - 1; i++)
         {
             enemyLineTypes[i] = (LineType)Random.Range(0, 4);  // Assign random line types
         }
+
+        // Append HeartShape at the last index
+        enemyLineTypes[enemyLineTypes.Length - 1] = LineType.HeartShape;
 
         // Get the reference to the main camera
         mainCamera = Camera.main;
@@ -66,6 +69,9 @@ public class boss : MonoBehaviour
                 break;
             case LineType.CaretShape:
                 lineTypeTexts[index].text = "<color=yellow>^</color>";  // ^ shape symbol
+                break;
+            case LineType.HeartShape:
+                lineTypeTexts[index].text = "♥"; // Unicode heart symbol
                 break;
         }
     }
@@ -112,6 +118,8 @@ public class boss : MonoBehaviour
             matchingType = LineType.VShape;
         else if (drawnColor == Color.yellow)
             matchingType = LineType.CaretShape;
+        else if (drawnColor == Color.magenta) 
+            matchingType = LineType.HeartShape;
 
         // Find and remove the first matching line type
         for (int i = 0; i < enemyLineTypes.Length; i++)
@@ -156,9 +164,8 @@ public class boss : MonoBehaviour
 
             // Show the level complete UI and move to the next level
             Debug.Log("Level Complete UI will now appear");
-            completeDrawingLevelUI.SetActive(true);
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            FindObjectOfType<GameManager>().CompleteLevel();
         }
     }
     
