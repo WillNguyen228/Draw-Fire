@@ -1,0 +1,16 @@
+- Create 4 objects at the map edges to act like fences keeping the player character from flying offscreen
+    - Make sure they are a child of canvas
+    - Use Image Components
+        - Set anchors: use the "Top Center" anchor for object on the top, "Middle Left" for the object on the left of the screen, etc.
+        - Use the Rect Tool instead of the Scale Tool to adjust size (Rect Tool located just below Scale Tool in the scene window)
+    - Add a collider 2D (make sure the collider covers the edge of the map)
+
+- Fixing player (honestly just trash it and make a new Image Object)
+    - Please add a sprite
+    - Add a collider 2D (Remember to adjust collider mannually)
+    - Add a Rigibody2D
+        - Body Type Dynamic
+        - Mass: 0
+        - Freeze Rotation Z
+        - Collision Detection: Continuous
+    - Add the PlayerMovement to the Player object
