@@ -787,8 +787,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -531.67, y: 84.769}
-  m_SizeDelta: {x: 397.32, y: 730.84}
+  m_AnchoredPosition: {x: -538, y: -17}
+  m_SizeDelta: {x: 433.8, y: 716.57}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1761924439
 MonoBehaviour:
@@ -810,7 +810,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: DUMB WAYS TO KILL A MOSQUITO
+  m_text: Draw&Fire
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 125cb55b44b24c4393181402bc6200e6, type: 2}
