@@ -8,6 +8,8 @@ public class MagicDrawing : MonoBehaviour
     private LineRenderer currentLine;
     private List<Vector3> points = new List<Vector3>();
     public List<enemy> enemies;  // Reference to multiple enemy scripts
+    public Animator playerAnimator;
+    private bool isHoldingBow = false; // ✅ New: tracks if bow is being held
     void Update()
     {
         if (Input.GetMouseButtonDown(0)) // Start drawing
@@ -33,7 +35,7 @@ public class MagicDrawing : MonoBehaviour
                 if (currentEnemy != null)  // Ensure the enemy is not destroyed
                 {
                     currentEnemy.RemoveMatchingLine(newColor);  // Check & remove matching enemy line
-                }  
+                }
             }
 
             // Check if the boss is involved in the process
@@ -47,6 +49,12 @@ public class MagicDrawing : MonoBehaviour
             {
                 Debug.LogWarning("Boss not found!");
             }
+        }
+        // ✅ New: If holding bow and click LMB again, shoot
+        if (isHoldingBow && Input.GetMouseButtonDown(0))
+        {
+            playerAnimator.SetTrigger("BowShoot");
+            isHoldingBow = false;
         }
     }
 
@@ -117,6 +125,18 @@ public class MagicDrawing : MonoBehaviour
         // Apply the color
         currentLine.startColor = newColor;
         currentLine.endColor = newColor;
+
+        // Trigger sword animation if red (vertical swipe)
+        if (newColor == Color.red && playerAnimator != null)
+        {
+            playerAnimator.SetTrigger("Attack");
+        }
+
+        if (newColor == Color.blue && playerAnimator != null)
+        {
+            playerAnimator.SetTrigger("BowCharge");
+            isHoldingBow = true;
+        }
 
         return newColor;
     }

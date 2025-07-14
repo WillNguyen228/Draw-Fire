@@ -7,30 +7,50 @@ public class PlayerMovement : MonoBehaviour {
     private Collider2D playerCollider;
     private Rigidbody2D playerrgbd;
 
-    void Start() {
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
+
+    void Start()
+    {
         playerCollider = GetComponent<Collider2D>();
         playerrgbd = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>(); // For flipping
     }
 
-    void Update() {
+    void Update()
+    {
         float movedirx = 0f;
         float movediry = 0f;
 
         // Arrow Keys + WASD
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) {
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+        {
             movediry += 1f;
         }
-        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) {
+        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+        {
             movediry -= 1f;
         }
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+        {
             movedirx -= 1f;
         }
-        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+        {
             movedirx += 1f;
         }
 
         movedir = new Vector3(movedirx, movediry).normalized;
+        
+        // Tell Animator whether we're walking
+        bool isMoving = movedir.magnitude > 0;
+        animator.SetBool("isWalking", isMoving);
+
+        // Flip sprite based on horizontal direction
+        if (movedirx != 0) {
+            spriteRenderer.flipX = movedirx < 0;
+        }
     }
 
     void FixedUpdate() {
