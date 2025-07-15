@@ -4,11 +4,11 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class EnemyMovement : MonoBehaviour
 {
-    public float moveSpeed = 2f;
-    public float stopDistance = 0.1f;
-    public float attackRange = 1.0f;         // How close to player before attacking
-    public float attackCooldown = 1f;      // Time between attacks in seconds
-    public int attackDamage = 10;             // Damage done to player per attack
+    public float moveSpeed;
+    public float stopDistance;
+    public float attackRange;         // How close to player before attacking
+    public float attackCooldown;      // Time between attacks in seconds
+    public int attackDamage;             // Damage done to player per attack
     private GameObject player;
     private Rigidbody2D rb;
     private Animator animator;
@@ -22,6 +22,7 @@ public class EnemyMovement : MonoBehaviour
         rb.freezeRotation = true;
 
         animator = GetComponent<Animator>();
+        animator.SetBool("IsCoolDown", false);
 
         baseScaleX = transform.localScale.x; // store the original scale.x here (e.g., 3)
 
@@ -89,11 +90,12 @@ public class EnemyMovement : MonoBehaviour
         {
             Debug.Log("[DEBUG] Player is in range.");
         }
-        if (Time.time >= lastAttackTime + attackCooldown)
+        if (Time.time <= lastAttackTime + attackCooldown)
         {
             Debug.Log("[DEBUG] Cooldown passed.");
+            animator.SetBool("IsCoolDown", false);
         }
-        if (distance <= stopDistance) //distance <= attackRange && && Time.time >= lastAttackTime + attackCooldown
+        if (distance <= attackRange && Time.time >= lastAttackTime + attackCooldown) //distance <= attackRange && && Time.time >= lastAttackTime + attackCooldown
         {
             Debug.Log("First Attack!");
             Attack();
@@ -103,8 +105,6 @@ public class EnemyMovement : MonoBehaviour
     void Attack()
     {
         lastAttackTime = Time.time;
-        Debug.Log("Second Attack!");
-        // Trigger attack animation
         animator?.SetTrigger("Attack");
     }
 

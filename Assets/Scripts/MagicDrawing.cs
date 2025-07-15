@@ -9,7 +9,7 @@ public class MagicDrawing : MonoBehaviour
     private List<Vector3> points = new List<Vector3>();
     public List<enemy> enemies;  // Reference to multiple enemy scripts
     public Animator playerAnimator;
-    private bool isHoldingBow = false; // ✅ New: tracks if bow is being held
+    private bool isHoldingBow = false; // New: tracks if bow is being held
     void Update()
     {
         if (Input.GetMouseButtonDown(0)) // Start drawing
@@ -50,7 +50,7 @@ public class MagicDrawing : MonoBehaviour
                 Debug.LogWarning("Boss not found!");
             }
         }
-        // ✅ New: If holding bow and click LMB again, shoot
+        // New: If holding bow and click LMB again, shoot
         if (isHoldingBow && Input.GetMouseButtonDown(0))
         {
             playerAnimator.SetTrigger("BowShoot");
@@ -68,32 +68,17 @@ public class MagicDrawing : MonoBehaviour
 
     Color ChangeLineColor()
     {
-        if (currentLine == null || points.Count < 2) return Color.white; // Not enough points to determine direction
+        //if (currentLine == null || points.Count < 2) return Color.white; // Not enough points to determine direction
+
+        float length = CalculateLineLength();
+        if (length < 2f)  // Example: ignore short strokes
+        {
+            Debug.Log("Drawing too short to be valid. Length: " + length);
+            return new Color(0.5f, 0.5f, 0.5f); // Gray for invalid shape
+        }
 
         float deltaX = Mathf.Abs(points[points.Count - 1].x - points[0].x);
         float deltaY = Mathf.Abs(points[points.Count - 1].y - points[0].y);
-
-        // Find the highest and lowest points in the drawing
-        float highestY = points[0].y;
-        float lowestY = points[0].y;
-        int highestIndex = 0, lowestIndex = 0;
-
-        for (int i = 1; i < points.Count; i++)
-        {
-            if (points[i].y > highestY)
-            {
-                highestY = points[i].y;
-                highestIndex = i;
-            }
-            if (points[i].y < lowestY)
-            {
-                lowestY = points[i].y;
-                lowestIndex = i;
-            }
-        }
-
-        // Define a threshold to avoid false peak/dip detections
-        float heightThreshold = Mathf.Abs(points[points.Count - 1].y - points[0].y) * 0.5f; // 50% of start-end difference
 
         Color newColor;
 
@@ -106,20 +91,24 @@ public class MagicDrawing : MonoBehaviour
             newColor = Color.cyan; // Circle -> Cyan
         }
         // Check if it forms a peak ( ∧ ) or a dip ( ∨ )
-        else if (highestY - points[0].y > heightThreshold && highestY - points[points.Count - 1].y > heightThreshold)
+        else if (HasStrongPeak())
         {
             newColor = Color.yellow;  // Peak ( ^ ) -> Yellow
         }
-        else if (points[0].y - lowestY > heightThreshold && points[points.Count - 1].y - lowestY > heightThreshold)
+        else if (HasStrongDip())
         {
             newColor = Color.green;  // Dip ( v ) -> Green
         }
-        else
+        else if (IsStraightEnough())
         {
             // Default to horizontal/vertical check
             // More horizontal, make blue
             // More vertical, make red
             newColor = (deltaX > deltaY) ? Color.blue : Color.red;
+        }
+        else
+        {
+            newColor = new Color(0.5f, 0.5f, 0.5f); // fallback color
         }
 
         // Apply the color
@@ -212,6 +201,71 @@ public class MagicDrawing : MonoBehaviour
 
         // 4. Accept as circle if variance is small (tweak this value)
         return avgVariance < 0.3f * avgRadius;
+    }
+
+    float CalculateLineLength()
+    {
+        float totalLength = 0f;
+        for (int i = 1; i < points.Count; i++)
+        {
+            totalLength += Vector3.Distance(points[i], points[i - 1]);
+        }
+        return totalLength;
+    }
+
+    bool HasStrongPeak()
+    {
+        for (int i = 1; i < points.Count - 1; i++)
+        {
+            Vector2 a = points[i - 1] - points[i];
+            Vector2 b = points[i + 1] - points[i];
+
+            float angle = Vector2.Angle(a, b);
+            if (angle < 90f) // small angle = sharp corner = peak
+            {
+                if (a.y > 0 && b.y > 0) // both pointing down
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    bool HasStrongDip()
+    {
+        for (int i = 1; i < points.Count - 1; i++)
+        {
+            Vector2 a = points[i - 1] - points[i];
+            Vector2 b = points[i + 1] - points[i];
+
+            float angle = Vector2.Angle(a, b);
+            if (angle < 90f) // small angle = sharp corner = dip
+            {
+                if (a.y < 0 && b.y < 0) // both pointing up
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsStraightEnough()
+    {
+        // Calculate direction from start to end
+        Vector2 mainDir = points[points.Count - 1] - points[0];
+        mainDir.Normalize();
+
+        // Check that most intermediate points follow the main direction closely
+        int alignedPoints = 0;
+        for (int i = 1; i < points.Count - 1; i++)
+        {
+            Vector2 dir = points[i] - points[0];
+            dir.Normalize();
+            float angle = Vector2.Angle(dir, mainDir);
+            if (angle < 15f)
+                alignedPoints++;
+        }
+
+        float ratio = (float)alignedPoints / (points.Count - 2);
+        return ratio > 0.8f; // at least 80% of points must align
     }
 
     Vector3 GetMouseWorldPosition()

@@ -3,11 +3,22 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
     public float speed = 10f;
-    public Vector2 direction = Vector2.right;
+    public Vector2 direction;
+    private Renderer rend;
 
+    void Start()
+    {
+        rend = GetComponent<Renderer>();
+    }
     void Update()
     {
-        transform.Translate(direction * speed * Time.deltaTime);
+        transform.position += (Vector3)(direction * speed * Time.deltaTime);
+
+        // If it's no longer visible by any camera, destroy it
+        if (rend != null && !rend.isVisible)
+        {
+            Destroy(gameObject);
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
