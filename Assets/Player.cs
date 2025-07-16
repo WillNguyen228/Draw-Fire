@@ -13,15 +13,21 @@ public class Player : MonoBehaviour
     public Transform arrowSpawnPoint; // Empty GameObject placed at the bow tip
     public Vector2 arrowOffset = new Vector2(1f, 0f); // Offset from player center
     private bool facingRight = true;
+    private Animator animator;
+    private bool isDead = false;
     void Start()
     {
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-        FaceCursor(); // Always face mouse
+        if (animator.GetCurrentAnimatorStateInfo(0).fullPathHash == -316234913)
+        {
+            FaceCursor(); // Always face mouse
+        }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -73,8 +79,22 @@ public class Player : MonoBehaviour
     void Die()
     {
         // Optional: play death animation, sound, etc. here
+        isDead = true;
+        Debug.Log("Triggering Die animation");
+        Debug.Log("Animator exists: " + (animator != null));
+        if (animator != null)
+        {
+            animator.SetTrigger("Die");
+        }
+        else
+        {
+            Debug.LogError("Animator is NULL! Assign it in the Inspector.");
+        }
+    }
 
-        Destroy(gameObject); // Remove the goblin from the scene
+    public void DestroySelf()
+    {
+        Destroy(gameObject);
     }
 
     // Called by animation event (or manually for testing)

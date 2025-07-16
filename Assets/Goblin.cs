@@ -25,9 +25,10 @@ public class Goblin : MonoBehaviour
 
     void TakeDamage(int damage)
     {
+        Debug.Log("TakeDamage called with damage: " + damage);
         currentHealth -= damage;
         healthBar.SetHealth(currentHealth);
-        Debug.Log(currentHealth);
+        Debug.Log("Current health: " + currentHealth);
 
         if (currentHealth <= 0)
         {
@@ -53,5 +54,20 @@ public class Goblin : MonoBehaviour
     public void DestroySelf()
     {
         Destroy(gameObject);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        Debug.Log("Something entered Goblin trigger: " + other.name);  // Always prints
+
+        if (other.name == "SwordCollider")
+        {
+            Debug.Log("Goblin hit by sword!");
+            TakeDamage(20);
+        }
+        else if (other.name == "Arrow(Clone)")
+        {
+            TakeDamage(30);
+        }
     }
 }

@@ -90,7 +90,7 @@ public class EnemyMovement : MonoBehaviour
         {
             Debug.Log("[DEBUG] Player is in range.");
         }
-        if (Time.time <= lastAttackTime + attackCooldown)
+        if (Time.time >= lastAttackTime + attackCooldown)
         {
             Debug.Log("[DEBUG] Cooldown passed.");
             animator.SetBool("IsCoolDown", false);
