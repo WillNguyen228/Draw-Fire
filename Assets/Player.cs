@@ -1,17 +1,20 @@
 using UnityEngine;
+using System.Collections;
 
 public class Player : MonoBehaviour
 {
     [Header("Health")]
     public int maxHealth = 100;
     public int currentHealth;
-
     public Health healthBar;
 
     [Header("Arrow Shooting")]
     public GameObject arrowPrefab; // Drag your Arrow prefab here in the Inspector
     public Transform arrowSpawnPoint; // Empty GameObject placed at the bow tip
     public Vector2 arrowOffset = new Vector2(1f, 0f); // Offset from player center
+
+    [Header("Screens")]
+    public GameOver gameOverScreen;
     private bool facingRight = true;
     private Animator animator;
     private bool isDead = false;
@@ -75,7 +78,7 @@ public class Player : MonoBehaviour
             Die();
         }
     }
-    
+
     void Die()
     {
         // Optional: play death animation, sound, etc. here
@@ -90,6 +93,23 @@ public class Player : MonoBehaviour
         {
             Debug.LogError("Animator is NULL! Assign it in the Inspector.");
         }
+    }
+
+    // This method is public so you can call it from the animation event at the end of the death animation
+    public void ShowGameOver()
+    {
+        Debug.Log("Animation event triggered ShowGameOver");
+
+        if (gameOverScreen != null)
+        {
+            gameOverScreen.Setup();
+        }
+        else
+        {
+            Debug.LogError("GameOverScreen is not assigned!");
+        }
+
+        Time.timeScale = 0f;
     }
 
     public void DestroySelf()

@@ -4,7 +4,7 @@ public class Goblin : MonoBehaviour
 {
     public int maxHealth = 60;
     public int currentHealth;
-
+    public EnermySpawning spawner;  // set by the spawner script
     public Health healthBar;
     public Animator animator; // Assign in Inspector
     private bool isDead = false;
@@ -38,6 +38,11 @@ public class Goblin : MonoBehaviour
 
     void Die()
     {
+        if (spawner != null)
+        {
+            spawner.OnEnemyDied();
+        }
+        
         // Optional: play death animation, sound, etc. here
         isDead = true;
         Debug.Log("Triggering Die animation");

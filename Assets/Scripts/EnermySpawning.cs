@@ -1,29 +1,79 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EnermySpawning : MonoBehaviour
 {
-    public GameObject enemyPrefab;
+    [Header("Enemy Settings")]
+    public GameObject[] enemyPrefabs;
     public float spawnInterval = 5f;
     public int enemiesPerSpawn = 2;
+    public int totalEnemiesToSpawn = 10;
 
     private float timer;
+    private int enemiesSpawned = 0;
+    private int enemiesAlive = 0;
+
+    [Header("Win Menu")]
+    public WinMenu winMenu;
 
     void Update()
     {
-        timer += Time.deltaTime;
-        if (timer >= spawnInterval)
+        if (enemiesSpawned < totalEnemiesToSpawn)
         {
-            SpawnTwoEnemies();
-            timer = 0f;
+            timer += Time.deltaTime;
+            if (timer >= spawnInterval)
+            {
+                SpawnEnemies();
+                timer = 0f;
+            }
         }
     }
 
-    void SpawnTwoEnemies()
+    void SpawnEnemies()
     {
-        for (int i = 0; i < enemiesPerSpawn; i++)
+        for (int i = 0; i < enemiesPerSpawn && enemiesSpawned < totalEnemiesToSpawn; i++)
         {
             Vector2 spawnPos = GetRandomEdgePositionOutsideCamera();
-            Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+
+            if (enemyPrefabs.Length > 0)
+            {
+                int index = Random.Range(0, enemyPrefabs.Length);
+                GameObject enemyToSpawn = enemyPrefabs[index];
+                GameObject enemyInstance = Instantiate(enemyToSpawn, spawnPos, Quaternion.identity);
+
+                // Register death callback
+                Goblin enemyScript = enemyInstance.GetComponent<Goblin>();
+                if (enemyScript != null)
+                {
+                    enemyScript.spawner = this;
+                }
+
+                enemiesSpawned++;
+                enemiesAlive++;
+            }
+        }
+    }
+
+    public void OnEnemyDied()
+    {
+        enemiesAlive--;
+        if (enemiesAlive <= 0 && enemiesSpawned >= totalEnemiesToSpawn)
+        {
+            Debug.Log("Level won. Unlocking more one more level");
+            UnlockNewLevel();
+            Debug.Log("All enemies defeated! Trigger victory.");
+            winMenu.Setup();
+        }
+    }
+
+    void UnlockNewLevel()
+    {
+        // When a round is won add one more index to unlocked rounds
+        if (SceneManager.GetActiveScene().buildIndex >= PlayerPrefs.GetInt("ReachedIndex"))
+        {
+            PlayerPrefs.SetInt("ReachedIndex", SceneManager.GetActiveScene().buildIndex + 1);
+            PlayerPrefs.SetInt("UnlockedLevel", PlayerPrefs.GetInt("UnlockedLevel", 1) + 1);
+            PlayerPrefs.Save();
         }
     }
 

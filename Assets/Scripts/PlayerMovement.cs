@@ -1,9 +1,11 @@
 using UnityEngine;
+using System;
 
 public class PlayerMovement : MonoBehaviour {
     [SerializeField] private float speed = 4f; // Default speed, editable in Inspector
 
     private Vector3 movedir;
+    private Vector3 ogScale;
     private Collider2D playerCollider;
     private Rigidbody2D playerrgbd;
 
@@ -13,6 +15,7 @@ public class PlayerMovement : MonoBehaviour {
     void Start()
     {
         playerCollider = GetComponent<Collider2D>();
+        ogScale = new Vector3(Math.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         playerrgbd = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>(); // For flipping
@@ -48,8 +51,11 @@ public class PlayerMovement : MonoBehaviour {
         animator.SetBool("isWalking", isMoving);
 
         // Flip sprite based on horizontal direction
-        if (movedirx != 0) {
-            spriteRenderer.flipX = movedirx < 0;
+        if (movedirx != 0)
+        {
+            // spriteRenderer.flipX = movedirx < 0;
+            Vector3 flippedPosition = new Vector3(movedirx, 1.0f, 1.0f);
+            transform.localScale = Vector3.Scale(ogScale, flippedPosition);
         }
     }
 
