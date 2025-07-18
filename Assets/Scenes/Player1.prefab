@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 1239455497372085306}
   - component: {fileID: 5587895794623274671}
   m_Layer: 8
-  m_Name: Player
+  m_Name: Player1
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -342,7 +342,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.0054207444, y: 0.015578032}
+  m_Offset: {x: 0.0054207444, y: 0.011617962}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -352,7 +352,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.16064993, y: 0.21104404}
+  m_Size: {x: 0.16064993, y: 0.2031239}
   m_EdgeRadius: 0
 --- !u!114 &2097943471842419908
 MonoBehaviour:
@@ -385,6 +385,7 @@ MonoBehaviour:
   arrowPrefab: {fileID: 5608850032569177701, guid: d6ed6c6fa1182e74cae4b9ba9bbe2306, type: 3}
   arrowSpawnPoint: {fileID: 1971086840974051713}
   arrowOffset: {x: 0.1, y: 0}
+  gameOverScreen: {fileID: 0}
 --- !u!95 &5587895794623274671
 Animator:
   serializedVersion: 7

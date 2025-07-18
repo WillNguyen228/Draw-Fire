@@ -59,7 +59,11 @@ public class PlayerMovement : MonoBehaviour {
         }
     }
 
-    void FixedUpdate() {
-        playerrgbd.linearVelocity = movedir * speed;
+    void FixedUpdate()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).fullPathHash != -316234913)
+        {
+            playerrgbd.linearVelocity = movedir * speed;
+        }        
     }
 }

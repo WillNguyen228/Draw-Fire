@@ -4,12 +4,20 @@ using UnityEngine;
 
 public class MagicDrawing : MonoBehaviour
 {
+    // Make it so that they player have to draw a spiral to start the game
     public GameObject linePrefab;  // Assign a LineRenderer prefab
     private LineRenderer currentLine;
     private List<Vector3> points = new List<Vector3>();
     public List<enemy> enemies;  // Reference to multiple enemy scripts
-    public Animator playerAnimator;
+    public Animator archerAnimator;
+    public Animator knightAnimator;
+    public PlayerSwitcher playerSwitcher;
+    private Animator currentAnimator;
     private bool isHoldingBow = false; // New: tracks if bow is being held
+    void Start()
+    {
+        currentAnimator = archerAnimator; // or knightAnimator if that’s your default
+    }
     void Update()
     {
         if (Input.GetMouseButtonDown(0)) // Start drawing
@@ -53,11 +61,14 @@ public class MagicDrawing : MonoBehaviour
         // New: If holding bow and click LMB again, shoot
         if (isHoldingBow && Input.GetMouseButtonDown(0))
         {
-            playerAnimator.SetTrigger("BowShoot");
+            currentAnimator.SetTrigger("BowShoot");
             isHoldingBow = false;
         }
     }
-
+    public void SetActiveAnimator(Animator animator)
+    {
+        currentAnimator = animator;
+    }
     void CreateNewLine()
     {
         GameObject newLine = Instantiate(linePrefab);
@@ -97,14 +108,19 @@ public class MagicDrawing : MonoBehaviour
         }
         else if (HasStrongDip())
         {
-            newColor = Color.green;  // Dip ( v ) -> Green
+            newColor = Color.blue;  // Dip ( v ) -> Blue
+            // 🔁 Trigger player switch here
+            if (playerSwitcher != null)
+            {
+                playerSwitcher.SwitchPlayers(); // Switch characters
+            }
         }
         else if (IsStraightEnough())
         {
             // Default to horizontal/vertical check
             // More horizontal, make blue
             // More vertical, make red
-            newColor = (deltaX > deltaY) ? Color.blue : Color.red;
+            newColor = (deltaX > deltaY) ? Color.green : Color.red;
         }
         else
         {
@@ -116,15 +132,25 @@ public class MagicDrawing : MonoBehaviour
         currentLine.endColor = newColor;
 
         // Trigger sword animation if red (vertical swipe)
-        if (newColor == Color.red && playerAnimator != null)
+        if (newColor == Color.red && currentAnimator != null)
         {
-            playerAnimator.SetTrigger("Attack");
+            currentAnimator.SetTrigger("Attack");
         }
-
-        if (newColor == Color.blue && playerAnimator != null)
+        //Trigger charge animation if blue
+        if (newColor == Color.green && currentAnimator != null)
         {
-            playerAnimator.SetTrigger("BowCharge");
+            currentAnimator.SetTrigger("BowCharge");
             isHoldingBow = true;
+        }
+        // Trigger AOE attack when circle is drawn
+        if (newColor == Color.cyan && currentAnimator != null)
+        {
+            currentAnimator.SetTrigger("AOEAttack");  // Circle shape triggers AOE
+        }
+        // Trigger healing action when circle is drawn
+        if (newColor == Color.magenta && currentAnimator != null)
+        {
+            currentAnimator.SetTrigger("Heal");  // Heart shape triggers Heal
         }
 
         return newColor;

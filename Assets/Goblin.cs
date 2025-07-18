@@ -42,7 +42,7 @@ public class Goblin : MonoBehaviour
         {
             spawner.OnEnemyDied();
         }
-        
+
         // Optional: play death animation, sound, etc. here
         isDead = true;
         Debug.Log("Triggering Die animation");
@@ -63,12 +63,17 @@ public class Goblin : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Something entered Goblin trigger: " + other.name);  // Always prints
+        Debug.Log("Something entered Enemy trigger: " + other.name);  // Always prints
 
         if (other.name == "SwordCollider")
         {
             Debug.Log("Goblin hit by sword!");
             TakeDamage(20);
+        }
+        if (other.name == "ExplosionCollider")
+        {
+            Debug.Log("Goblin hit by explosion!");
+            TakeDamage(40);
         }
         else if (other.name == "Arrow(Clone)")
         {

@@ -13,6 +13,9 @@ public class Player : MonoBehaviour
     public Transform arrowSpawnPoint; // Empty GameObject placed at the bow tip
     public Vector2 arrowOffset = new Vector2(1f, 0f); // Offset from player center
 
+    [Header("Explosion")]
+    public Animator explosionAnimator;
+
     [Header("Screens")]
     public GameOver gameOverScreen;
     private bool facingRight = true;
@@ -77,6 +80,24 @@ public class Player : MonoBehaviour
         {
             Die();
         }
+    }
+
+    public void Heal()
+    {
+        currentHealth += 30;
+        healthBar.SetHealth(currentHealth);
+    }
+
+    public void PlayExplosion()
+    {
+        // explosionEffect.SetActive(true);
+        explosionAnimator.gameObject.SetActive(true); // Ensure it's active
+        explosionAnimator.SetTrigger("LightAOE");
+    }
+
+    public void DisableExplosion()
+    {
+        explosionAnimator.gameObject.SetActive(false);
     }
 
     void Die()
