@@ -1,14 +1,22 @@
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
 public class EnemyMovement : MonoBehaviour
 {
+    [Header("Movement & Combat")]
     public float moveSpeed;
     public float stopDistance;
     public float attackRange;         // How close to player before attacking
     public float attackCooldown;      // Time between attacks in seconds
     public int attackDamage;             // Damage done to player per attack
+    public GameObject arrowPrefab;
+    public Transform RightarrowSpawnPoint;
+    public Transform LeftarrowSpawnPoint;
+    public bool isArcher = false;
+
+    private bool facingRight = true;
     private GameObject player;
     private Rigidbody2D rb;
     private Animator animator;
@@ -31,6 +39,16 @@ public class EnemyMovement : MonoBehaviour
         {
             Debug.LogWarning("Player not found! Make sure it's tagged 'Player'.");
         }
+
+        if (player.transform.position.x < transform.position.x)
+        {
+
+            FaceLeft();
+        }
+        else
+        {
+            FaceRight();
+        }
     }
 
     void FixedUpdate()
@@ -39,6 +57,23 @@ public class EnemyMovement : MonoBehaviour
 
         Vector2 direction = player.transform.position - transform.position;
         float distance = direction.magnitude;
+
+        // Face the player
+        if (player != null)
+        {
+            if (player.transform.position.x < transform.position.x)
+            {
+                Debug.Log("Player is facing left");
+                facingRight = false;
+                FaceLeft();
+            }
+            else
+            {
+                Debug.Log("Player is facing right");
+                facingRight = true;
+                FaceRight();
+            }
+        }
 
         // Handle stop/freeze
         if (!isStopped && distance < attackRange) //stopDistance
@@ -66,14 +101,6 @@ public class EnemyMovement : MonoBehaviour
             // Animation logic
             animator.SetBool("IsMoving", true);
             animator.SetFloat("MoveX", direction.x);
-
-            // Flip sprite for left/right facing (if needed)
-            if (Mathf.Abs(direction.x) > 0.1f)
-            {
-                Vector3 scale = transform.localScale;
-                scale.x = baseScaleX * (direction.x > 0 ? 1 : -1);
-                transform.localScale = scale;
-            }
         }
         else
         {
@@ -101,11 +128,41 @@ public class EnemyMovement : MonoBehaviour
             Attack();
         }
     }
+    void FaceLeft()
+    {
+        if (facingRight)
+        {
+            facingRight = false;
+
+            Vector3 localScale = transform.localScale;
+            localScale.x = -Mathf.Abs(localScale.x);
+            transform.localScale = localScale;
+        }
+    }
+
+    void FaceRight()
+    {
+        if (!facingRight)
+        {
+            facingRight = true;
+
+            Vector3 localScale = transform.localScale;
+            localScale.x = Mathf.Abs(localScale.x);
+            transform.localScale = localScale;
+        }
+    }
 
     void Attack()
     {
         lastAttackTime = Time.time;
-        animator?.SetTrigger("Attack");
+        if (isArcher)
+        {
+            animator?.SetTrigger("Attack"); // triggers arrow-shoot animation
+        }
+        else
+        {
+            animator?.SetTrigger("Attack"); // still allow melee animation
+        }
     }
 
     // Called from Animation Event at moment of attack hit frame
@@ -122,5 +179,87 @@ public class EnemyMovement : MonoBehaviour
                 playerScript.TakeDamage(attackDamage);
             }
         }
+    }
+
+    // This will be called from the animation event during the attack
+    public void ShootArrow()
+    {
+        if (!isArcher || arrowPrefab == null || LeftarrowSpawnPoint == null || RightarrowSpawnPoint == null) return;
+
+        Vector2 direction;
+        GameObject arrow;
+
+        // if (LeftarrowSpawnPoint == null) return;
+        if (facingRight)
+        {
+            // 1. Get direction from spawn point to player (not from the archer's root transform!)
+            direction = (player.transform.position - RightarrowSpawnPoint.position).normalized;
+
+            // 2. Instantiate arrow at spawn point
+            arrow = Instantiate(arrowPrefab, RightarrowSpawnPoint.position, Quaternion.identity);
+        }
+        else
+        {
+            // 1. Get direction from spawn point to player (not from the archer's root transform!)
+            direction = (player.transform.position - LeftarrowSpawnPoint.position).normalized;
+
+            // 2. Instantiate arrow at spawn point
+            arrow = Instantiate(arrowPrefab, LeftarrowSpawnPoint.position, Quaternion.identity);
+        }
+
+        // 3. Assign direction to Arrow script (same as player shooting)
+        Arrow arrowScript = arrow.GetComponent<Arrow>();
+        if (arrowScript != null)
+        {
+            arrowScript.direction = direction;
+        }
+
+        // 4. Rotate to face direction
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
+        Debug.Log("Arrow shot at: " + Time.time);
+    }
+
+    public void PerformRadialArrowBurst()
+    {
+        StartCoroutine(PerformRadialArrowBurstWaves());
+    }
+
+    private IEnumerator PerformRadialArrowBurstWaves()
+    {
+        if (arrowPrefab == null) yield break;
+
+        int numWaves = Random.Range(3, 6); // 3 to 5 waves
+        float delayBetweenWaves = 0.4f;
+
+        for (int wave = 0; wave < numWaves; wave++)
+        {
+            int numArrows = Random.Range(10, 20);
+            float angleOffset = Random.Range(0f, 360f);
+            float radius = Random.Range(0.8f, 1.5f);
+            float angleStep = 360f / numArrows;
+
+            for (int i = 0; i < numArrows; i++)
+            {
+                float angle = (i * angleStep + angleOffset + Random.Range(-5f, 5f)) * Mathf.Deg2Rad;
+                Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).normalized;
+                Vector2 spawnPos = (Vector2)transform.position + direction * radius;
+
+                GameObject arrow = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
+
+                Arrow arrowScript = arrow.GetComponent<Arrow>();
+                if (arrowScript != null)
+                {
+                    arrowScript.direction = direction;
+                }
+
+                arrow.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+            }
+
+            Debug.Log($"Wave {wave + 1}/{numWaves} fired!");
+            yield return new WaitForSeconds(delayBetweenWaves);
+        }
+
+        Debug.Log("Radial arrow burst complete!");
     }
 }

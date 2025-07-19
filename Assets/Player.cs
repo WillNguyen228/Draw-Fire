@@ -167,4 +167,20 @@ public class Player : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         arrow.transform.rotation = Quaternion.Euler(0, 0, angle);
     }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        Debug.Log("Something entered Player trigger: " + other.name);  // Always prints
+
+        if (other.name == "Evil Arrow(Clone)")
+        {
+            Debug.Log("Player hit by arrow!");
+            TakeDamage(15);
+        }
+        if (other.name == "Wizard Blast(Clone)")
+        {
+            Debug.Log("Player hit by arrow!");
+            TakeDamage(50);
+        }
+    }
 }

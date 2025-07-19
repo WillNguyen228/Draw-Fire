@@ -1,13 +1,26 @@
 using UnityEngine;
+using System.Collections;
 
 public class Goblin : MonoBehaviour
 {
+    [Header("Health")]
     public int maxHealth = 60;
     public int currentHealth;
     public EnermySpawning spawner;  // set by the spawner script
     public Health healthBar;
     public Animator animator; // Assign in Inspector
     private bool isDead = false;
+
+    [Header("Teleport Logic")]
+    public Transform[] teleportPoints;
+    private int currentTeleportIndex = -1;
+    private int damageTaken = 0;
+    private int specialAttackDamageTaken = 0;
+    public Transform centerTeleportPoint;
+    public EnemyMovement enemyMovementScript;
+    private bool doSpecialAttack = false;
+    private float teleportDelay = 0.5f;
+    private float teleportTimer = 0f;
 
     void Start()
     {
@@ -21,14 +34,44 @@ public class Goblin : MonoBehaviour
         {
             TakeDamage(20);
         }
+        // Debug testing triggers
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            TeleportToRandomCorner();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            TeleportToCenter();
+        }
     }
 
     void TakeDamage(int damage)
     {
         Debug.Log("TakeDamage called with damage: " + damage);
         currentHealth -= damage;
+        damageTaken += damage; //For the wizard
+        specialAttackDamageTaken += damage; // for special wizard burst
+
         healthBar.SetHealth(currentHealth);
         Debug.Log("Current health: " + currentHealth);
+
+        // 100 DAMAGE → RANDOM TELEPORT
+        if (damageTaken >= 100 && !isDead)
+        {
+            Debug.Log("Triggering teleport due to 100+ damage");
+            TeleportToRandomCorner();
+            damageTaken = 0; // RESET COUNTER AFTER TELEPORT
+        }
+
+        // 150 DAMAGE → CENTER TELEPORT + SPECIAL ARROW BURST
+        if (specialAttackDamageTaken >= 150 && !isDead)
+        {
+            Debug.Log("Triggering SPECIAL ATTACK due to 150+ damage");
+
+            animator?.SetTrigger("Teleport");
+            TeleportToCenter();
+            specialAttackDamageTaken = 0;
+        }
 
         if (currentHealth <= 0)
         {
@@ -77,7 +120,69 @@ public class Goblin : MonoBehaviour
         }
         else if (other.name == "Arrow(Clone)")
         {
+            Debug.Log("Enemy hit by arrow!");
             TakeDamage(30);
         }
+        if (other.name == "Evil Arrow(Clone)")
+        {
+            Debug.Log("Enemy hit by arrow!");
+            TakeDamage(15);
+        }
+        if (other.name == "Wizard Blast(Clone)")
+        {
+            Debug.Log("Enemy hit by blast!");
+            TakeDamage(50);
+        }
     }
+
+    // ===================== TELEPORT & METEOR LOGIC ======================
+    void TeleportToRandomCorner()
+    {
+        if (teleportPoints.Length == 0) return;
+
+        int nextIndex = Random.Range(0, teleportPoints.Length);
+        // If same index as last time, just pick the next one cyclically
+        if (teleportPoints.Length > 1 && nextIndex == currentTeleportIndex)
+        {
+            nextIndex = (nextIndex + 1) % teleportPoints.Length;
+        }
+
+        currentTeleportIndex = nextIndex;
+        Transform newPos = teleportPoints[currentTeleportIndex];
+        Debug.Log("Teleporting to point: " + newPos.name);
+
+        animator?.SetTrigger("Teleport");
+        StartCoroutine(TeleportAfterDelay(newPos.position, 0.5f));
+    }
+    public void TeleportToCenter()
+    {
+        if (centerTeleportPoint == null) return;
+
+        animator?.SetTrigger("Teleport");
+        // StartCoroutine(TeleportAfterDelay(centerTeleportPoint.position, 0.5f));
+        StartCoroutine(PerformSpecialAttack(centerTeleportPoint.position, 0.5f));
+    }
+
+    IEnumerator TeleportAfterDelay(Vector3 position, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        transform.position = position;
+    }
+    IEnumerator PerformSpecialAttack(Vector3 position, float delay)
+    {
+        yield return new WaitForSeconds(delay); // wait for teleport delay
+        transform.position = position; // perform teleport
+        yield return null; // wait one frame before bursting
+
+        if (enemyMovementScript != null)
+        {
+            Debug.Log("Activating the PerformRadialArrowBurst()");
+            enemyMovementScript.PerformRadialArrowBurst();
+        }
+        else
+        {
+            Debug.LogWarning("EnemyMovementScript not assigned!");
+        }
+    }
+
 }

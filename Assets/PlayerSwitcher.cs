@@ -7,7 +7,7 @@ public class PlayerSwitcher : MonoBehaviour
     public MagicDrawing magicDrawing; 
     public Animator archerAnimator; 
     public Animator knightAnimator;  
-    private GameObject activePlayer;
+    public static GameObject activePlayer;  // 👈 Make this static
 
     void Start()
     {
