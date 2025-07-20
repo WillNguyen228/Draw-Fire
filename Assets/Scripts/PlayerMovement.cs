@@ -23,6 +23,7 @@ public class PlayerMovement : MonoBehaviour {
 
     void Update()
     {
+        if (GameManager.IsGamePaused) return;
         float movedirx = 0f;
         float movediry = 0f;
 

@@ -33,7 +33,11 @@ public class EnemyMovement : MonoBehaviour
         animator.SetBool("IsCoolDown", false);
 
         baseScaleX = transform.localScale.x; // store the original scale.x here (e.g., 3)
+    }
 
+    void FixedUpdate()
+    {
+        if (GameManager.IsGamePaused) return;
         player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
         {
@@ -49,10 +53,6 @@ public class EnemyMovement : MonoBehaviour
         {
             FaceRight();
         }
-    }
-
-    void FixedUpdate()
-    {
         if (player == null) return;
 
         Vector2 direction = player.transform.position - transform.position;
@@ -220,17 +220,18 @@ public class EnemyMovement : MonoBehaviour
         Debug.Log("Arrow shot at: " + Time.time);
     }
 
-    public void PerformRadialArrowBurst()
+    public void PerformRadialArrowBurst(Vector2 burstPosition)
     {
-        StartCoroutine(PerformRadialArrowBurstWaves());
+        StartCoroutine(PerformRadialArrowBurstWaves(burstPosition));
     }
 
-    private IEnumerator PerformRadialArrowBurstWaves()
+    private IEnumerator PerformRadialArrowBurstWaves(Vector2 center)
     {
         if (arrowPrefab == null) yield break;
 
         int numWaves = Random.Range(3, 6); // 3 to 5 waves
         float delayBetweenWaves = 0.4f;
+        Debug.Log("Burst center used: " + center);
 
         for (int wave = 0; wave < numWaves; wave++)
         {
@@ -243,7 +244,7 @@ public class EnemyMovement : MonoBehaviour
             {
                 float angle = (i * angleStep + angleOffset + Random.Range(-5f, 5f)) * Mathf.Deg2Rad;
                 Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).normalized;
-                Vector2 spawnPos = (Vector2)transform.position + direction * radius;
+                Vector2 spawnPos = center + direction * radius;
 
                 GameObject arrow = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
 

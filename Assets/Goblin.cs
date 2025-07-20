@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using DialogueEditor;
+using UnityEngine.SceneManagement;
 
 public class Goblin : MonoBehaviour
 {
@@ -21,6 +23,14 @@ public class Goblin : MonoBehaviour
     private bool doSpecialAttack = false;
     private float teleportDelay = 0.5f;
     private float teleportTimer = 0f;
+
+    [Header("Optional Dialogue")]
+    public NPCConversation freedKnightDialogue;
+    private bool hasTriggeredDialogue = false; // prevent double trigger
+
+    [Header("Is This the Final Boss?")]
+    public bool isFinalBoss = false;
+    public WinMenu winMenu;
 
     void Start()
     {
@@ -81,27 +91,85 @@ public class Goblin : MonoBehaviour
 
     void Die()
     {
-        if (spawner != null)
+        if (spawner != null && !isFinalBoss)
         {
             spawner.OnEnemyDied();
         }
 
         // Optional: play death animation, sound, etc. here
         isDead = true;
-        Debug.Log("Triggering Die animation");
+        // Debug.Log("Triggering Die animation");
         Debug.Log("Animator exists: " + (animator != null));
         if (animator != null)
         {
             animator.SetTrigger("Die");
         }
+        // else
+        // {
+        //     Debug.LogError("Animator is NULL! Assign it in the Inspector.");
+        // }
+
+        // If this is the CAGE being broken, start dialogue
+        if (isFinalBoss)
+        {
+            if (freedKnightDialogue != null && !hasTriggeredDialogue)
+            {
+                hasTriggeredDialogue = true;
+
+                // Time.timeScale = 0f; // ⏸ pause fight
+                GameManager.IsGamePaused = true;
+                Debug.Log("Pausing the game?: " + GameManager.IsGamePaused);
+                Debug.Log("Triggering dialogue: " + freedKnightDialogue);
+                // ConversationManager.OnConversationEnded += ResumeAfterDialogue;
+                ConversationManager.Instance.StartConversation(freedKnightDialogue);
+            }
+            else
+            {
+                // No dialogue? Just show win menu
+                ShowVictory();
+            }
+        }
         else
         {
-            Debug.LogError("Animator is NULL! Assign it in the Inspector.");
+            // fallback: just destroy if not a special goblin
+            Destroy(gameObject, 0.5f);
         }
+    }
+    // Resume game when dialogue is done
+    public void ResumeAfterDialogue()
+    {
+        // Time.timeScale = 1f;
+        GameManager.IsGamePaused = false;
+        Debug.Log("Pausing the game?: " + GameManager.IsGamePaused);
+        Destroy(gameObject); // Optional: remove cage after dialogue
+        // ConversationManager.OnConversationEnded -= ResumeAfterDialogue;
     }
     public void DestroySelf()
     {
         Destroy(gameObject);
+    }
+    public void OnFinalBossDialogueComplete()
+    {
+        GameManager.IsGamePaused = false;
+
+        Debug.Log("Final boss dialogue complete. Showing win menu.");
+        winMenu.Setup();
+
+        Destroy(gameObject); // Remove wizard after dialogue (optional)
+    }
+    void ShowVictory()
+    {
+        if (winMenu != null)
+        {
+            winMenu.Setup();
+        }
+        else
+        {
+            Debug.LogWarning("WinMenu not assigned to final boss!");
+        }
+
+        // Optionally unlock levels here too
+        // You can copy the logic from your previous UnlockNewLevel() method
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -177,7 +245,7 @@ public class Goblin : MonoBehaviour
         if (enemyMovementScript != null)
         {
             Debug.Log("Activating the PerformRadialArrowBurst()");
-            enemyMovementScript.PerformRadialArrowBurst();
+            enemyMovementScript.PerformRadialArrowBurst(position);
         }
         else
         {

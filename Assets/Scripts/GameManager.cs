@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public static bool IsGamePaused = false;
     bool gameHasEnded = false;
 
     public float restartDelay = 1f;

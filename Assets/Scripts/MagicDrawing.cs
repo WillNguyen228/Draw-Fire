@@ -14,6 +14,8 @@ public class MagicDrawing : MonoBehaviour
     public PlayerSwitcher playerSwitcher;
     private Animator currentAnimator;
     private bool isHoldingBow = false; // New: tracks if bow is being held
+    private int arrowCharges = 0;
+    private int maxCharges = 3;
     void Start()
     {
         currentAnimator = archerAnimator; // or knightAnimator if that’s your default
@@ -45,25 +47,24 @@ public class MagicDrawing : MonoBehaviour
                     currentEnemy.RemoveMatchingLine(newColor);  // Check & remove matching enemy line
                 }
             }
-
-            // Check if the boss is involved in the process
-            boss bossEnemy = FindObjectOfType<boss>();  // Find the boss (adjust as needed for your setup)
-            if (bossEnemy != null)
-            {
-                Debug.Log("Boss found, removing matching line...");
-                bossEnemy.RemoveMatchingLine(newColor);  // Apply logic specific to boss
-            }
-            else
-            {
-                Debug.LogWarning("Boss not found!");
-            }
         }
-        // New: If holding bow and click LMB again, shoot
-        if (isHoldingBow && Input.GetMouseButtonDown(0))
+        // New: If holding bow and click RMB again, shoot
+        if (arrowCharges > 0 && Input.GetMouseButtonDown(1))
         {
-            currentAnimator.SetTrigger("BowShoot");
-            isHoldingBow = false;
+            currentAnimator.SetTrigger("BowShoot"); // triggers arrow via animation event
+            arrowCharges--;
+            Debug.Log("Fired! Arrows remaining: " + arrowCharges);
+
+            if (arrowCharges > 0)
+                StartCoroutine(ResetToChargePose());
+            else
+                isHoldingBow = false;
         }
+    }
+    IEnumerator ResetToChargePose()
+    {
+        yield return null; // Wait 1 frame
+        currentAnimator.SetTrigger("BowCharge");
     }
     public void SetActiveAnimator(Animator animator)
     {
@@ -139,8 +140,17 @@ public class MagicDrawing : MonoBehaviour
         //Trigger charge animation if blue
         if (newColor == Color.green && currentAnimator != null)
         {
-            currentAnimator.SetTrigger("BowCharge");
-            isHoldingBow = true;
+            if (arrowCharges < maxCharges)
+            {
+                arrowCharges++;
+                currentAnimator.SetTrigger("BowCharge");
+                isHoldingBow = true;
+                Debug.Log("Charged! Arrows ready: " + arrowCharges);
+            }
+            else
+            {
+                Debug.Log("Already at max charges.");
+            }
         }
         // Trigger AOE attack when circle is drawn
         if (newColor == Color.cyan && currentAnimator != null)

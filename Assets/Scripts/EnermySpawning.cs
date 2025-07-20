@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using DialogueEditor;
 
 public class EnermySpawning : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class EnermySpawning : MonoBehaviour
 
     [Header("Win Menu")]
     public WinMenu winMenu;
+
+    [Header("Final Dialogue")]
+    public NPCConversation finalConversation;
+    private bool finalDialoguePlayed = false;
 
     void Update()
     {
@@ -59,11 +64,37 @@ public class EnermySpawning : MonoBehaviour
         enemiesAlive--;
         if (enemiesAlive <= 0 && enemiesSpawned >= totalEnemiesToSpawn)
         {
-            Debug.Log("Level won. Unlocking more one more level");
-            UnlockNewLevel();
-            Debug.Log("All enemies defeated! Trigger victory.");
-            winMenu.Setup();
+            Debug.Log("All enemies defeated. Playing final dialogue.");
+            finalDialoguePlayed = true;
+
+            if (finalConversation != null)
+            {
+                GameManager.IsGamePaused = true;
+                Debug.Log("Pausing the game?: " + GameManager.IsGamePaused);
+                Debug.Log("Triggering dialogue: " + finalConversation);
+                ConversationManager.Instance.StartConversation(finalConversation);
+            }
+            else
+            {
+                ShowWinMenu();
+            }
         }
+    }
+    public void OnFinalConversationEnded()
+    {
+        GameManager.IsGamePaused = false;
+        Debug.Log("Pausing the game?: " + GameManager.IsGamePaused);
+        Debug.Log("Final dialogue finished. Showing win menu.");
+        Debug.Log("Level won. Unlocking more one more level");
+        UnlockNewLevel();
+        Debug.Log("Trigger victory.");
+        winMenu.Setup();
+    }
+
+    void ShowWinMenu()
+    {
+        UnlockNewLevel();
+        winMenu.Setup();
     }
 
     void UnlockNewLevel()

@@ -5,30 +5,27 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/Menu.unity
-    guid: b98c6c88eb7218c4ba5ae66348f11e93
   - enabled: 1
     path: Assets/Scenes/New Menu.unity
     guid: abeac2a3916b51e4581a201fec048408
-  - enabled: 0
-    path: Assets/Scenes/Stage1_Level1.unity
-    guid: b5fd9dfe8542d4666a972ec554453586
-  - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/Scenes/Level 1.unity
+    path: Assets/Scenes/Level 1_Intro.unity
+    guid: 9a957a098f6dec748832cdc9619ef8d5
+  - enabled: 1
+    path: Assets/Scenes/Level 1_Fight.unity
     guid: 4e104783071941d4c934d7646f9632f0
   - enabled: 1
-    path: Assets/Scenes/Level 2.unity
-    guid: 38c200df22a0f2c47b5e2d23d560eecb
-  - enabled: 0
-    path: Assets/Scenes/rockpapaerscissors.unity
-    guid: c6f5652618903ab4fb97cb493942bbca
+    path: Assets/Scenes/Level 2_Intro.unity
+    guid: 294372781764fa644956f7be7d7572d2
   - enabled: 1
-    path: Assets/Scenes/Level 3.unity
-    guid: c770d3248d4819c4ab1b6edcc21d5137
+    path: Assets/Scenes/Level 2_Fight.unity
+    guid: e8f80353fb7d6a8449b2edf5c72fe612
+  - enabled: 1
+    path: Assets/Scenes/Level 3_Intro.unity
+    guid: 2c7a6bd5869b39c4a81929afb1e47c6d
+  - enabled: 1
+    path: Assets/Scenes/Level 3_Fight.unity
+    guid: 46fa0e0ff594941439f5dec2aad1e44e
   - enabled: 1
     path: Assets/Scenes/Credits.unity
     guid: c4bdeab33cea2ad408472f8f8c44d45c
