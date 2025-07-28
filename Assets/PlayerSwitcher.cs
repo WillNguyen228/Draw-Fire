@@ -8,13 +8,23 @@ public class PlayerSwitcher : MonoBehaviour
     public Animator archerAnimator; 
     public Animator knightAnimator;  
     public static GameObject activePlayer;  // 👈 Make this static
+    private Player archerScript;
+    private Player knightScript;
 
     void Start()
     {
         activePlayer = archerPlayer;
+        archerPlayer.SetActive(true);
         knightPlayer.SetActive(false);
         // Ensure MagicDrawing starts with correct animator
         magicDrawing.SetActiveAnimator(archerAnimator);
+
+        // Cache Player scripts
+        archerScript = archerPlayer.GetComponent<Player>();
+        knightScript = knightPlayer.GetComponent<Player>();
+
+        archerScript.SetActiveState(true);
+        knightScript.SetActiveState(false);
     }
 
     void Update()
@@ -37,11 +47,15 @@ public class PlayerSwitcher : MonoBehaviour
         {
             activePlayer = knightPlayer;
             magicDrawing.SetActiveAnimator(knightAnimator);
+            archerScript.SetActiveState(false);
+            knightScript.SetActiveState(true);
         }
         else
         {
             activePlayer = archerPlayer;
-            magicDrawing.SetActiveAnimator(archerAnimator); 
+            magicDrawing.SetActiveAnimator(archerAnimator);
+            knightScript.SetActiveState(false);
+            archerScript.SetActiveState(true);
         }
 
         // Set new player position and activate

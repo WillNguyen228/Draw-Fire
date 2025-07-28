@@ -3,6 +3,8 @@ using System;
 
 public class PlayerMovement : MonoBehaviour {
     [SerializeField] private float speed = 4f; // Default speed, editable in Inspector
+    [SerializeField] private float dashForce = 20f;
+    [SerializeField] private float dashDuration = 0.1f;
 
     private Vector3 movedir;
     private Vector3 ogScale;
@@ -11,6 +13,9 @@ public class PlayerMovement : MonoBehaviour {
 
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+
+    private bool isDashing = false;
+    private float dashTimer = 0f;
 
     void Start()
     {
@@ -46,7 +51,7 @@ public class PlayerMovement : MonoBehaviour {
         }
 
         movedir = new Vector3(movedirx, movediry).normalized;
-        
+
         // Tell Animator whether we're walking
         bool isMoving = movedir.magnitude > 0;
         animator.SetBool("isWalking", isMoving);
@@ -58,13 +63,38 @@ public class PlayerMovement : MonoBehaviour {
             Vector3 flippedPosition = new Vector3(movedirx, 1.0f, 1.0f);
             transform.localScale = Vector3.Scale(ogScale, flippedPosition);
         }
+        
+        // Trigger dash on right click (mouse button 1)
+        if (Input.GetMouseButtonDown(1) && movedir != Vector3.zero && !isDashing)
+        {
+            Debug.Log("Dashing!");
+            isDashing = true;
+            dashTimer = dashDuration;
+            playerrgbd.linearVelocity = Vector2.zero; // reset current velocity
+            playerrgbd.AddForce(movedir * dashForce, ForceMode2D.Impulse);
+        }
+
+        // Manage dash state
+        if (isDashing)
+        {
+            dashTimer -= Time.deltaTime;
+            if (dashTimer <= 0f)
+            {
+                isDashing = false;
+            }
+        }
     }
 
     void FixedUpdate()
     {
-        if (animator.GetCurrentAnimatorStateInfo(0).fullPathHash != -316234913)
+        // if (animator.GetCurrentAnimatorStateInfo(0).fullPathHash != -316234913)
+        // {
+        //     playerrgbd.linearVelocity = movedir * speed;
+        // }
+        
+        if (!isDashing)
         {
             playerrgbd.linearVelocity = movedir * speed;
-        }        
+        }
     }
 }

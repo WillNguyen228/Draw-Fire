@@ -21,6 +21,8 @@ public class Player : MonoBehaviour
     private bool facingRight = true;
     private Animator animator;
     private bool isDead = false;
+    private bool isActive = true; // Assume true by default
+    public float passiveHealRate = 2.5f; // health per second
     void Start()
     {
         currentHealth = maxHealth;
@@ -39,6 +41,18 @@ public class Player : MonoBehaviour
         {
             TakeDamage(20);
         }
+
+        if (!isActive && currentHealth < maxHealth && !isDead)
+        {
+            currentHealth += Mathf.RoundToInt(passiveHealRate * Time.deltaTime);
+            currentHealth = Mathf.Min(currentHealth, maxHealth);
+            healthBar.SetHealth(currentHealth);
+        }
+    }
+
+    public void SetActiveState(bool active)
+    {
+        isActive = active;
     }
 
     void FaceCursor()

@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b8568fa2ed006e4f91b6113733dea0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 1
+  moveSpeed: 0.5
   stopDistance: 0.7
   attackRange: 0.6
   attackCooldown: 2
@@ -421,6 +421,9 @@ MonoBehaviour:
   teleportPoints: []
   centerTeleportPoint: {fileID: 0}
   enemyMovementScript: {fileID: 0}
+  freedKnightDialogue: {fileID: 0}
+  isFinalBoss: 0
+  winMenu: {fileID: 0}
 --- !u!95 &6746925863007162482
 Animator:
   serializedVersion: 7
