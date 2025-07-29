@@ -102,6 +102,10 @@ public class MagicDrawing : MonoBehaviour
         {
             newColor = Color.cyan; // Circle -> Cyan
         }
+        else if (DetectSquareShape())
+        {
+            newColor = new Color(1f, 0.5f, 0f); // Rectangle -> Orange
+        }
         // Check if it forms a peak ( ∧ ) or a dip ( ∨ )
         else if (HasStrongPeak())
         {
@@ -162,8 +166,54 @@ public class MagicDrawing : MonoBehaviour
         {
             currentAnimator.SetTrigger("Heal");  // Heart shape triggers Heal
         }
+        // Trigger summon animation when rectangle is drawn
+        if (newColor == new Color(1f, 0.5f, 0f) && currentAnimator != null)
+        {
+            currentAnimator.SetTrigger("Summon");
+        }
 
         return newColor;
+    }
+
+    bool DetectSquareShape()
+    {
+        if (points.Count < 6) return false;
+
+        // Must be a closed shape
+        // if (Vector3.Distance(points[0], points[points.Count - 1]) > 0.5f)
+            // return false;
+
+        // Check bounding box aspect ratio
+        float minX = float.MaxValue, maxX = float.MinValue;
+        float minY = float.MaxValue, maxY = float.MinValue;
+
+        foreach (var p in points)
+        {
+            minX = Mathf.Min(minX, p.x);
+            maxX = Mathf.Max(maxX, p.x);
+            minY = Mathf.Min(minY, p.y);
+            maxY = Mathf.Max(maxY, p.y);
+        }
+
+        float width = maxX - minX;
+        float height = maxY - minY;
+
+        //if (width < height * 1.2f) // Must be a flat box: wider than tall
+        //    return false;
+
+        // Detect corners by checking sharp-ish angles
+        List<int> cornerIndices = new List<int>();
+        for (int i = 2; i < points.Count - 2; i++)
+        {
+            Vector2 a = points[i - 1] - points[i];
+            Vector2 b = points[i + 1] - points[i];
+            float angle = Vector2.Angle(a, b);
+
+            if (angle > 50f && angle < 130f)
+                cornerIndices.Add(i);
+        }
+
+        return cornerIndices.Count >= 2 && cornerIndices.Count <= 7;
     }
 
     bool DetectHeartShape()
@@ -208,35 +258,31 @@ public class MagicDrawing : MonoBehaviour
 
     bool DetectCircleShape()
     {
-        if (points.Count < 10) return false; // Too few points for a circle
+        if (points.Count < 12) return false; // Require more points
 
-        if (Vector3.Distance(points[0], points[points.Count - 1]) > 0.5f)
-            return false; // Not a closed shape
+        if (Vector3.Distance(points[0], points[points.Count - 1]) > 0.4f)
+            return false; // Must be tightly closed
 
-        // 1. Calculate center of mass (average point)
+        // Compute center
         Vector3 center = Vector3.zero;
         foreach (var p in points)
             center += p;
         center /= points.Count;
 
-        // 2. Calculate average radius
+        // Average radius
         float avgRadius = 0f;
         foreach (var p in points)
             avgRadius += Vector3.Distance(p, center);
         avgRadius /= points.Count;
 
-        // 3. Check how close each point's distance is to the average
+        // Check smoothness
         float variance = 0f;
         foreach (var p in points)
-        {
-            float dist = Vector3.Distance(p, center);
-            variance += Mathf.Abs(dist - avgRadius);
-        }
-
+            variance += Mathf.Abs(Vector3.Distance(p, center) - avgRadius);
         float avgVariance = variance / points.Count;
 
-        // 4. Accept as circle if variance is small (tweak this value)
-        return avgVariance < 0.3f * avgRadius;
+        // Circle must be smooth and consistent
+        return avgVariance < 0.25f * avgRadius; // tighter
     }
 
     float CalculateLineLength()
